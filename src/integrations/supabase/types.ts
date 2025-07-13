@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          created_at: string
+          end_time: string
+          facility_id: string
+          id: string
+          notes: string | null
+          start_time: string
+          status: string | null
+          total_amount: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          facility_id: string
+          id?: string
+          notes?: string | null
+          start_time: string
+          status?: string | null
+          total_amount?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          facility_id?: string
+          id?: string
+          notes?: string | null
+          start_time?: string
+          status?: string | null
+          total_amount?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           created_at: string | null
@@ -143,6 +197,74 @@ export type Database = {
           },
         ]
       }
+      facilities: {
+        Row: {
+          address: string | null
+          amenities: string[] | null
+          capacity: number | null
+          city: string | null
+          created_at: string
+          description: string | null
+          email: string | null
+          facility_type: string | null
+          id: string
+          name: string
+          owner_id: string | null
+          phone: string | null
+          state: string | null
+          status: string | null
+          updated_at: string
+          website: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          amenities?: string[] | null
+          capacity?: number | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          facility_type?: string | null
+          id?: string
+          name: string
+          owner_id?: string | null
+          phone?: string | null
+          state?: string | null
+          status?: string | null
+          updated_at?: string
+          website?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          amenities?: string[] | null
+          capacity?: number | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          facility_type?: string | null
+          id?: string
+          name?: string
+          owner_id?: string | null
+          phone?: string | null
+          state?: string | null
+          status?: string | null
+          updated_at?: string
+          website?: string | null
+          zip_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facilities_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null
@@ -248,6 +370,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          facility_id: string | null
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          facility_id?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          facility_id?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -257,10 +418,22 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["user_role"]
+        }
+        Returns: boolean
+      }
+      owns_facility: {
+        Args: { _user_id: string; _facility_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       drawing_status: "upcoming" | "active" | "completed" | "cancelled"
       quiz_type: "basic_watch_knowledge" | "luxury_brands" | "watch_mechanics"
+      user_role: "admin" | "facility_owner" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -390,6 +563,7 @@ export const Constants = {
     Enums: {
       drawing_status: ["upcoming", "active", "completed", "cancelled"],
       quiz_type: ["basic_watch_knowledge", "luxury_brands", "watch_mechanics"],
+      user_role: ["admin", "facility_owner", "user"],
     },
   },
 } as const
